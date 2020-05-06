@@ -16,13 +16,26 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    downloadmanagerwidget.cpp \
+    downloadwidget.cpp \
     main.cpp \
     browser.cpp
 
 HEADERS += \
-    browser.h
+    browser.h \
+    downloadmanagerwidget.h \
+    downloadwidget.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+FORMS += \
+    certificateerrordialog.ui \
+    downloadmanagerwidget.ui \
+    downloadwidget.ui \
+    passworddialog.ui
+
+RESOURCES += \
+    data/m2browser.qrc
