@@ -1,22 +1,34 @@
-#ifndef DOWNLOADWIDGET_H
+﻿#ifndef DOWNLOADWIDGET_H
 #define DOWNLOADWIDGET_H
 
-#include <QWidget>
+#include "ui_downloadwidget.h"
 
-namespace Ui {
-class DownloadWidget;
-}
+#include <QFrame>
+#include <QElapsedTimer>
 
-class DownloadWidget : public QWidget
+QT_BEGIN_NAMESPACE
+class QWebEngineDownloadItem;
+QT_END_NAMESPACE
+
+
+class DownloadWidget final : public QFrame, public Ui::DownloadWidget
 {
     Q_OBJECT
 
 public:
-    explicit DownloadWidget(QWidget *parent = nullptr);
-    ~DownloadWidget();
+    explicit DownloadWidget(QWebEngineDownloadItem *download, QWidget *parent = nullptr);
+
+signals:
+    void removeClicked(DownloadWidget *self);
+
+private slots:
+    void updateWidget();
 
 private:
-    Ui::DownloadWidget *ui;
+    QString withUnit(qreal bytes);
+
+    QWebEngineDownloadItem *m_download;
+    QElapsedTimer m_timeAdded;
 };
 
 #endif // DOWNLOADWIDGET_H
