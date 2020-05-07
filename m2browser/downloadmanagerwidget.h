@@ -1,22 +1,30 @@
-#ifndef DOWNLOADMANAGERWIDGET_H
+﻿#ifndef DOWNLOADMANAGERWIDGET_H
 #define DOWNLOADMANAGERWIDGET_H
+
+#include "ui_downloadmanagerwidget.h"
 
 #include <QWidget>
 
-namespace Ui {
-class DownloadManagerWidget;
-}
+QT_BEGIN_NAMESPACE
+class QWebEngineDownloadItem;
+QT_END_NAMESPACE
 
-class DownloadManagerWidget : public QWidget
+class DownloadWidget;
+
+class DownloadManagerWidget final : public QWidget, public Ui::DownloadManagerWidget
 {
     Q_OBJECT
 
 public:
     explicit DownloadManagerWidget(QWidget *parent = nullptr);
-    ~DownloadManagerWidget();
 
-private:
-    Ui::DownloadManagerWidget *ui;
+    void downloadRequested(QWebEngineDownloadItem *webItem);
+
+private:    
+    void add(DownloadWidget *downloadwidget);
+    void remove(DownloadWidget *downloadwidget);
+
+    int m_numDownloads;
 };
 
 #endif // DOWNLOADMANAGERWIDGET_H
