@@ -1,14 +1,29 @@
-#ifndef BROWSER_H
+﻿#ifndef BROWSER_H
 #define BROWSER_H
 
-#include <QMainWindow>
+#include "downloadmanagerwidget.h"
 
-class browser : public QMainWindow
+#include <QVector>
+#include <QWebEngineProfile>
+
+class BrowserWindow;
+
+class Browser
 {
-    Q_OBJECT
-
 public:
-    browser(QWidget *parent = nullptr);
-    ~browser();
+    Browser();
+
+    QVector<BrowserWindow*> windows() { return m_windows; }
+
+    BrowserWindow *createWindow(bool offTheRecord = false);
+    BrowserWindow *createDevToolsWindow();
+
+    DownloadManagerWidget &downloadManagerWidget() { return m_downloadManagerWidget; }
+
+private:
+    QVector<BrowserWindow*> m_windows;
+    DownloadManagerWidget m_downloadManagerWidget;
+    QScopedPointer<QWebEngineProfile> m_otrProfile;
+
 };
 #endif // BROWSER_H
