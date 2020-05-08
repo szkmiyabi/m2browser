@@ -20,13 +20,15 @@ SOURCES += \
     downloadmanagerwidget.cpp \
     downloadwidget.cpp \
     main.cpp \
-    browser.cpp
+    browser.cpp \
+    tabwidget.cpp
 
 HEADERS += \
     browser.h \
     browserwindow.h \
     downloadmanagerwidget.h \
-    downloadwidget.h
+    downloadwidget.h \
+    tabwidget.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
