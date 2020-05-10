@@ -23,6 +23,7 @@ SOURCES += \
     browser.cpp \
     tabwidget.cpp \
     webpage.cpp \
+    webpopupwindow.cpp \
     webview.cpp
 
 HEADERS += \
@@ -32,6 +33,7 @@ HEADERS += \
     downloadwidget.h \
     tabwidget.h \
     webpage.h \
+    webpopupwindow.h \
     webview.h
 
 # Default rules for deployment.
