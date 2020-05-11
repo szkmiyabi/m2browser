@@ -5,7 +5,7 @@
 #include <QWebEngineRegisterProtocolHandlerRequest>
 
 
-class WebPage : QWebEnginePage
+class WebPage : public QWebEnginePage
 {
     Q_OBJECT
 
