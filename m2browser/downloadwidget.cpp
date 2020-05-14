@@ -108,13 +108,12 @@ void DownloadWidget::updateWidget()
     }
 
     if(state == QWebEngineDownloadItem::DownloadInProgress) {
-        //アイコン作成は後回し
-        //static QIcon cancelIcon(QStringLiteral(":name-to-icon.png"));
-        //m_cancelButton->setIcon(cancelIcon);
-        //m_cancelButton->setToolTip(tr("Stop downloading"));
+        static QIcon cancelIcon(QStringLiteral(":process-stop.png"));
+        m_cancelButton->setIcon(cancelIcon);
+        m_cancelButton->setToolTip(tr("Stop downloading"));
     } else {
-        //static QIcon removeIcon(QStringLiteral(":name-to-icon.png"));
-        //m_cancelButton->setIcon(removeIcon);
-        //m_cancelButton->setToolTip(tr("Remove from list"));
+        static QIcon removeIcon(QStringLiteral(":edit-clear.png"));
+        m_cancelButton->setIcon(removeIcon);
+        m_cancelButton->setToolTip(tr("Remove from list"));
     }
 }
