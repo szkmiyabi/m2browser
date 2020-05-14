@@ -36,11 +36,6 @@ HEADERS += \
     webpopupwindow.h \
     webview.h
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
 FORMS += \
     certificateerrordialog.ui \
     downloadmanagerwidget.ui \
@@ -49,3 +44,15 @@ FORMS += \
 
 RESOURCES += \
     data/m2browser.qrc
+
+win32 {
+    RC_ICONS = appicon.ico
+}
+macx {
+    ICON = appicon.icns
+}
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
