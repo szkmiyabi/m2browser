@@ -119,7 +119,7 @@ inline QString questionForFeature(QWebEnginePage::Feature feature)
     case QWebEnginePage::MediaVideoCapture:
         return WebPage::tr("Allow %1 to access your webcam?");
     case QWebEnginePage::MediaAudioVideoCapture:
-        return WebPage::tr("Allow %1 to access yor microphone and webcam?");
+        return WebPage::tr("Allow %1 to access your microphone and webcam?");
     case QWebEnginePage::MouseLock:
         return WebPage::tr("Allow %1 to lock your mouse cursor?");
     case QWebEnginePage::DesktopVideoCapture:
@@ -162,7 +162,8 @@ void WebPage::handleProxyAuthenticationRequired(const QUrl &, QAuthenticator *au
     passwordDialog.m_iconLabel->setPixmap(icon.pixmap(32, 32));
 
     QString introMessage = tr("Connect to proxy \"%1\" using:");
-    introMessage.arg(proxyHost.toHtmlEscaped());
+    introMessage = introMessage.arg(proxyHost.toHtmlEscaped());
+    passwordDialog.m_infoLabel->setText(introMessage);
     passwordDialog.m_infoLabel->setWordWrap(true);
 
     if(dialog.exec() == QDialog::Accepted) {

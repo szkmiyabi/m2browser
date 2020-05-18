@@ -21,8 +21,8 @@ public:
     void downloadRequested(QWebEngineDownloadItem *webItem);
 
 private:    
-    void add(DownloadWidget *downloadwidget);
-    void remove(DownloadWidget *downloadwidget);
+    void add(DownloadWidget *downloadWidget);
+    void remove(DownloadWidget *downloadWidget);
 
     int m_numDownloads;
 };

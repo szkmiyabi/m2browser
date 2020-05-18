@@ -155,7 +155,7 @@ void WebView::contextMenuEvent(QContextMenuEvent *event)
 
     if(inspectElement == actions.cend()) {
         auto viewSource = std::find(actions.cbegin(), actions.cend(), page()->action(QWebEnginePage::ViewSource));
-        if(viewSource == actions.end())
+        if(viewSource == actions.cend())
             menu->addSeparator();
 
         QAction *action = new QAction(menu);

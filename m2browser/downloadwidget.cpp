@@ -39,7 +39,7 @@ DownloadWidget::DownloadWidget(QWebEngineDownloadItem *download, QWidget *parent
 inline QString DownloadWidget::withUnit(qreal bytes)
 {
     if(bytes < (1 << 10)) //<< ビットのシフト演算
-        return tr("%L B").arg(bytes);
+        return tr("%L1 B").arg(bytes);
     else if(bytes < (1 << 20))
         return tr("%L1 KiB").arg(bytes / (1 << 10), 0, 'f', 2);
     else if(bytes < (1 << 30))
@@ -65,15 +65,16 @@ void DownloadWidget::updateWidget()
             m_progressBar->setValue(qRound(100 * receivedBytes / totalBytes));
             m_progressBar->setDisabled(false);
             m_progressBar->setFormat(
-                        tr("%p% - %1 downloaded - %2/s")
+                        tr("%p% - %1 of %2 downloaded - %3/s")
                         .arg(withUnit(receivedBytes))
+                        .arg(withUnit(totalBytes))
                         .arg(withUnit(bytesPerSecond))
             );
         } else {
             m_progressBar->setValue(0);
             m_progressBar->setDisabled(false);
             m_progressBar->setFormat(
-                        tr("unknown size - %1 downloaded - %2s")
+                        tr("unknown size - %1 downloaded - %2/s")
                         .arg(withUnit(receivedBytes))
                         .arg(withUnit(bytesPerSecond))
             );
@@ -83,7 +84,7 @@ void DownloadWidget::updateWidget()
         m_progressBar->setValue(100);
         m_progressBar->setDisabled(true);
         m_progressBar->setFormat(
-                    tr("completed - %1 downloaded - %2s")
+                    tr("completed - %1 downloaded - %2/s")
                     .arg(withUnit(receivedBytes))
                     .arg(withUnit(bytesPerSecond))
         );
@@ -92,7 +93,7 @@ void DownloadWidget::updateWidget()
         m_progressBar->setValue(0);
         m_progressBar->setDisabled(true);
         m_progressBar->setFormat(
-                    tr("cancelled - %1 downloaded - %2s")
+                    tr("cancelled - %1 downloaded - %2/s")
                     .arg(withUnit(receivedBytes))
                     .arg(withUnit(bytesPerSecond))
         );
