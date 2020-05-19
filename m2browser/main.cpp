@@ -13,14 +13,14 @@ QUrl commandLineUrlArgument()
         if(!arg.startsWith(QLatin1Char('-')))
             return QUrl::fromUserInput(arg);
     }
-    return QUrl(QStringLiteral("https://www.qt.io"));
+    return QUrl(QStringLiteral("https://www.google.com/"));
 }
 
 
 int main(int argc, char **argv)
 {
 
-    QCoreApplication::setOrganizationName("QtExamples");
+    QCoreApplication::setOrganizationName("JCI-TN");
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 

@@ -49,7 +49,6 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
         menuBar()->addMenu(createEditMenu());
         menuBar()->addMenu(createViewMenu(toolbar));
         menuBar()->addMenu(createWindowMenu(m_tabWidget));
-        menuBar()->addMenu(createHelpMenu());
     }
 
     QWidget *centralWidget = new QWidget(this);
@@ -311,14 +310,6 @@ QMenu *BrowserWindow::createWindowMenu(TabWidget *tabWidget)
 }
 
 
-QMenu *BrowserWindow::createHelpMenu()
-{
-    QMenu *helpMenu = new QMenu(tr("&Help"));
-    helpMenu->addAction(tr("About &Qt"), qApp, QApplication::aboutQt);
-    return helpMenu;
-}
-
-
 QToolBar *BrowserWindow::createToolBar()
 {
 
@@ -412,13 +403,13 @@ void BrowserWindow::handleWebActionEnabledChanged(QWebEnginePage::WebAction acti
 
 void BrowserWindow::handleWebViewTitleChanged(const QString &title)
 {
-    QString suffix = m_profile->isOffTheRecord() ?
-                tr("Qt Simple Browser (Incognite)") : tr("Qt Simple Browser");
+    QString preffix = m_profile->isOffTheRecord() ?
+                tr("m2browser (Incognite)") : tr("m2browser");
 
     if(title.isEmpty())
-        setWindowTitle(suffix);
+        setWindowTitle(preffix);
     else
-        setWindowTitle(title + " - " + suffix);
+        setWindowTitle(preffix + " - " + title);
 }
 
 
