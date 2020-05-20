@@ -25,7 +25,7 @@
 BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool forDevTools) :
     m_browser(browser),
     m_profile(profile),
-    m_tabWidget(new TabWidget(profile, this)),
+    m_tabWidget(new TabWidget(profile, this)), //TabWidgetクラスのインスタンスへのポインタ
     m_progressBar(nullptr),
     m_historyBackAction(nullptr),
     m_historyForwardAction(nullptr),
@@ -36,9 +36,12 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
     m_favAction(nullptr)
 {
 
+    //closeイベントが届いたら自動でdeleteする設定
     setAttribute(Qt::WA_DeleteOnClose, true);
+    //マウスクリックのみでフォーカスを移す設定
     setFocusPolicy(Qt::ClickFocus);
 
+    //通常のウィンドウの場合ツールバーとメニューバー表示
     if(!forDevTools) {
         m_progressBar = new QProgressBar(this);
 
@@ -51,32 +54,39 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
         menuBar()->addMenu(createWindowMenu(m_tabWidget));
     }
 
+    //レイアウトコンテナの設定
     QWidget *centralWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout;
 
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
+    //通常のウィンドウの場合progressバーを表示
     if(!forDevTools) {
         addToolBarBreak();
 
         m_progressBar->setMaximumHeight(1);
         m_progressBar->setTextVisible(false);
         m_progressBar->setStyleSheet(QStringLiteral(
-            "QProgressBar {border: 0px} QProgressBar::chunk {background-color: #da4453}"
+            "QProgressBar {border: 0px} QProgressBar::chunk {background-color: #00C000}"
         ));
 
         layout->addWidget(m_progressBar);
     }
 
+    //CentralWidget（ウィンドウいっぱいの幅高さにする）の設定
     layout->addWidget(m_tabWidget);
     centralWidget->setLayout(layout);
 
     setCentralWidget(centralWidget);
 
+    //URL参照やページ遷移に応じたアプリウィンドウタイトル変更の紐付け
     connect(m_tabWidget, &TabWidget::titleChanged, this, &BrowserWindow::handleWebViewTitleChanged);
 
     if(!forDevTools) {
+
+        //リンクポイント時、ロード状況、戻る・進む・更新の無効有効判断、URL変更時
+        //ファビコン変更時、DevTools要求時、URL欄Enter時、ページ内検索要求時の紐付け
         connect(m_tabWidget, &TabWidget::linkHovered, [this](const QString& url) {
             statusBar()->showMessage(url);
         });
@@ -87,7 +97,6 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
         });
         connect(m_tabWidget, &TabWidget::favIconChanged, m_favAction, &QAction::setIcon);
         connect(m_tabWidget, &TabWidget::devToolsRequested, this, &BrowserWindow::handleDevToolsRequested);
-        //URL入力＋Enter押下時のイベント処理
         connect(m_urlLineEdit, &QLineEdit::returnPressed, [this]() {
             m_tabWidget->setUrl(QUrl::fromUserInput(m_urlLineEdit->text()));
         });
@@ -96,6 +105,7 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
         connect(m_tabWidget, &TabWidget::findTextFinished, this, &BrowserWindow::handleFindTextFinished);
 #endif
 
+        //Ctrl+LでURL欄にフォーカス移動処置
         QAction *focusUrlLineEditAction = new QAction(this);
         addAction(focusUrlLineEditAction);
         focusUrlLineEditAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
@@ -104,12 +114,15 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
         });
     }
 
+    //引数があればそれを用いてアプリウィンドウタイトルを設定
     handleWebViewTitleChanged(QString());
+    //ポインタ経由でタブを生成
     m_tabWidget->createTab();
 
 }
 
 
+//Widgetの推奨サイズを取得
 QSize BrowserWindow::sizeHint() const
 {
     QRect desktopRect = QApplication::primaryScreen()->geometry();
@@ -118,9 +131,11 @@ QSize BrowserWindow::sizeHint() const
 }
 
 
+//ファイルメニューを生成
 QMenu *BrowserWindow::createFileMenu(TabWidget *tabWidget)
 {
 
+    //QMenuインスタンスを親にしてシグナル＋スロットを紐付けたQActionを追加していく
     QMenu *fileMenu = new QMenu(tr("&File"));
     fileMenu->addAction(tr("&New Window"), this, &BrowserWindow::handleNewWindowTriggered, QKeySequence::New);
     fileMenu->addAction(tr("New &Incognito Window"), this, &BrowserWindow::handleNewIncognitoWindowTriggered);
@@ -133,7 +148,7 @@ QMenu *BrowserWindow::createFileMenu(TabWidget *tabWidget)
     });
     fileMenu->addAction(newTabAction);
 
-    //htmlファイルを開く
+    //ウェブリソースを開くコマンドの定義と登録
     fileMenu->addAction(tr("&Open File..."), this, &BrowserWindow::handleFileOpenTriggered, QKeySequence::Open);
 
     fileMenu->addSeparator();
@@ -162,6 +177,7 @@ QMenu *BrowserWindow::createFileMenu(TabWidget *tabWidget)
 }
 
 
+//編集メニューを生成
 QMenu *BrowserWindow::createEditMenu()
 {
 
@@ -191,6 +207,7 @@ QMenu *BrowserWindow::createEditMenu()
 }
 
 
+//ビューメニューを生成
 QMenu *BrowserWindow::createViewMenu(QToolBar *toolbar)
 {
 
@@ -264,6 +281,7 @@ QMenu *BrowserWindow::createViewMenu(QToolBar *toolbar)
 }
 
 
+//ウィンドウメニューを生成
 QMenu *BrowserWindow::createWindowMenu(TabWidget *tabWidget)
 {
 
@@ -287,13 +305,14 @@ QMenu *BrowserWindow::createWindowMenu(TabWidget *tabWidget)
     previousTabAction->setShortcuts(shortcuts);
     connect(previousTabAction, &QAction::triggered, tabWidget, &TabWidget::previousTab);
 
-    //複数ウィンドウの切替を想定した処理
+    //ウィンドウメニューが表示される直前に紐付け
     connect(menu, &QMenu::aboutToShow, [this, menu, nextTabAction, previousTabAction]() {
         menu->clear();
         menu->addAction(nextTabAction);
         menu->addAction(previousTabAction);
         menu->addSeparator();
 
+        //単一あるいは複数のウィンドウを操作しカレントウィンドウの場合項目にチェック表示する処理
         QVector<BrowserWindow*> windows = m_browser->windows();
         int index(-1);
         for(auto window : windows) {
@@ -310,6 +329,7 @@ QMenu *BrowserWindow::createWindowMenu(TabWidget *tabWidget)
 }
 
 
+//ツールバーを生成
 QToolBar *BrowserWindow::createToolBar()
 {
 
@@ -317,6 +337,7 @@ QToolBar *BrowserWindow::createToolBar()
     navigationBar->setMovable(false);
     navigationBar->toggleViewAction()->setEnabled(false);
 
+    //戻るボタン
     m_historyBackAction = new QAction(this);
     QList<QKeySequence> backShortcuts = QKeySequence::keyBindings(QKeySequence::Back);
     for(auto it = backShortcuts.begin(); it != backShortcuts.end();) {
@@ -337,6 +358,7 @@ QToolBar *BrowserWindow::createToolBar()
     });
     navigationBar->addAction(m_historyBackAction);
 
+    //進むボタン
     m_historyForwardAction = new QAction(this);
     QList<QKeySequence> fwdShortcuts = QKeySequence::keyBindings(QKeySequence::Forward);
     for(auto it = fwdShortcuts.begin(); it != fwdShortcuts.end();) {
@@ -355,18 +377,21 @@ QToolBar *BrowserWindow::createToolBar()
     });
     navigationBar->addAction(m_historyForwardAction);
 
+    //更新/更新停止ボタン
     m_stopReloadAction = new QAction(this);
     connect(m_stopReloadAction, &QAction::triggered, [this]() {
         m_tabWidget->triggerWebPageAction(QWebEnginePage::WebAction(m_stopReloadAction->data().toInt()));
     });
     navigationBar->addAction(m_stopReloadAction);
 
+    //URL欄
     m_urlLineEdit = new QLineEdit(this);
     m_favAction = new QAction(this);
     m_urlLineEdit->addAction(m_favAction, QLineEdit::LeadingPosition);
     m_urlLineEdit->setClearButtonEnabled(true);
     navigationBar->addWidget(m_urlLineEdit);
 
+    //ダウンロードマネージャーボタン
     auto downloadsAction = new QAction(this);
     downloadsAction->setIcon(QIcon(QStringLiteral(":go-bottom.png")));
     downloadsAction->setToolTip(tr("Show downloads"));
@@ -380,6 +405,7 @@ QToolBar *BrowserWindow::createToolBar()
 }
 
 
+//基本的なウェブアクションの有効無効化のためのスロット
 void BrowserWindow::handleWebActionEnabledChanged(QWebEnginePage::WebAction action, bool enabled)
 {
     switch (action) {
@@ -401,6 +427,7 @@ void BrowserWindow::handleWebActionEnabledChanged(QWebEnginePage::WebAction acti
 }
 
 
+//アプリウィンドウのタイトル変更のためのスロット
 void BrowserWindow::handleWebViewTitleChanged(const QString &title)
 {
     QString preffix = m_profile->isOffTheRecord() ?
@@ -413,6 +440,7 @@ void BrowserWindow::handleWebViewTitleChanged(const QString &title)
 }
 
 
+//新しいアプリウィンドウを開く（追加）ためのスロット
 void BrowserWindow::handleNewWindowTriggered()
 {
     BrowserWindow *window = m_browser->createWindow();
@@ -420,6 +448,7 @@ void BrowserWindow::handleNewWindowTriggered()
 }
 
 
+//新しいプライベートアプリウィンドウを開く（追加）ためのスロット
 void BrowserWindow::handleNewIncognitoWindowTriggered()
 {
     BrowserWindow *window = m_browser->createWindow(true); //offTheRecord=true
@@ -427,6 +456,7 @@ void BrowserWindow::handleNewIncognitoWindowTriggered()
 }
 
 
+//ファイルを開く要求に応じてファイルを開くためのスロット
 void BrowserWindow::handleFileOpenTriggered()
 {
     QUrl url = QFileDialog::getOpenFileUrl(
@@ -442,6 +472,7 @@ void BrowserWindow::handleFileOpenTriggered()
 }
 
 
+//ページ内検索の要求に応じて検索（ダイアログ表示）するためのスロット
 void BrowserWindow::handleFindActionTriggered()
 {
     if(!currentTab())
@@ -473,6 +504,7 @@ void BrowserWindow::handleFindActionTriggered()
 }
 
 
+//アプリウィンドウを閉じるシグナルを関知して処理するためのスロット
 void BrowserWindow::closeEvent(QCloseEvent *event)
 {
     if(m_tabWidget->count() > 1) {
@@ -496,18 +528,21 @@ void BrowserWindow::closeEvent(QCloseEvent *event)
 }
 
 
+//TabWidgetインスタンスポインタを返す
 TabWidget *BrowserWindow::tabWidget() const
 {
     return m_tabWidget;
 }
 
 
+//TabWidgetインスタンス経由でカレントタブポインタを返す
 WebView *BrowserWindow::currentTab() const
 {
     return m_tabWidget->currentWebView();
 }
 
 
+//ページロード進捗に応じた更新/更新停止ボタンに切り換えるためのスロット
 void BrowserWindow::handleWebViewLoadProgress(int progress)
 {
     static QIcon stopIcon(QStringLiteral(":process-stop.png"));
@@ -527,8 +562,10 @@ void BrowserWindow::handleWebViewLoadProgress(int progress)
 }
 
 
+//アプリウィンドウ表示をきりかえるためのスロット
 void BrowserWindow::handleShowWindowTriggered()
 {
+    //シグナルを送信したオブジェクトへのポインタをQActionにキャストしアプリウィンドウ情報を得る
     if(QAction *action = qobject_cast<QAction*>(sender())) {
         int offset = action->data().toInt();
         QVector<BrowserWindow*> windows = m_browser->windows();
@@ -538,6 +575,7 @@ void BrowserWindow::handleShowWindowTriggered()
 }
 
 
+//DevToolsの表示要求に応じてDevToolsウィンドウを表示するためのスロット
 void BrowserWindow::handleDevToolsRequested(QWebEnginePage *source)
 {
     source->setDevToolsPage(m_browser->createDevToolsWindow()->currentTab()->page());
@@ -545,6 +583,7 @@ void BrowserWindow::handleDevToolsRequested(QWebEnginePage *source)
 }
 
 
+//ページ内検索結果が最後に到達した際の処理をするためのスロット
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
 void BrowserWindow::handleFindTextFinished(const QWebEngineFindTextResult &result)
 {
