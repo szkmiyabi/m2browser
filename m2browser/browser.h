@@ -6,7 +6,7 @@
 #include <QVector>
 #include <QWebEngineProfile>
 
-class BrowserWindow;
+class BrowserWindow;        //BrowserWindowクラスを参照
 
 class Browser
 {
@@ -18,24 +18,24 @@ public:
     //windowオブジェクトのベクター
     QVector<BrowserWindow*> windows() { return m_windows; }
 
-    //アプリケーションウィンドウを生成しポインタ返し
+    //アプリケーションウィンドウを生成しポインタを返す
     BrowserWindow *createWindow(bool offTheRecord = false);
 
-    //DevToolsウィンドウを生成しポインタ返し
+    //DevToolsウィンドウを生成しポインタを返す
     BrowserWindow *createDevToolsWindow();
 
-    //DownloadManagerWidgetの参照返し
+    //DownloadManagerWidgetの参照を返す
     DownloadManagerWidget &downloadManagerWidget() { return m_downloadManagerWidget; }
 
 private:
 
-    //windowオブジェクトのベクター
+    //アプリウィンドウのポインタのベクター
     QVector<BrowserWindow*> m_windows;
 
     //DownloadManagerWidgetクラスのインスタンス
     DownloadManagerWidget m_downloadManagerWidget;
 
-    //ポインタ登録されたプライベートウィンドウ用QWebEngineProfileクラス
+    //ポインタ登録されたプライベートウィンドウ用QWebEngineProfileクラス（通常/プライベートの切替用）
     QScopedPointer<QWebEngineProfile> m_otrProfile;
 
 };

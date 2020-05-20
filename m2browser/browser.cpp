@@ -23,7 +23,7 @@ Browser::Browser()
 }
 
 
-//アプリケーションウィンドウを生成しポインタ返し
+//アプリケーションウィンドウを生成しポインタを返す
 BrowserWindow *Browser::createWindow(bool offTheRecord)
 {
     //プライベートウィンドウの場合のSignal/Slot処理の付け直し
@@ -47,7 +47,7 @@ BrowserWindow *Browser::createWindow(bool offTheRecord)
 }
 
 
-//DevToolsウィンドウを生成しポインタ返し
+//DevToolsウィンドウを生成しポインタを返す
 BrowserWindow *Browser::createDevToolsWindow()
 {
     auto profile = QWebEngineProfile::defaultProfile();

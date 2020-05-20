@@ -21,7 +21,7 @@ class DownloadManagerWidget final : public QWidget, public Ui::DownloadManagerWi
 public:
 
     //コンストラクタ
-    //explicit:値渡しでコンストラクタを呼ばれないようにする処置
+    //explicitを宣言し値渡しでコンストラクタ呼び出し禁止
     explicit DownloadManagerWidget(QWidget *parent = nullptr);
 
     void downloadRequested(QWebEngineDownloadItem *webItem);
