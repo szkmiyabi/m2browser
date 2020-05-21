@@ -50,7 +50,9 @@ void DownloadManagerWidget::downloadRequested(QWebEngineDownloadItem *download)
 void DownloadManagerWidget::add(DownloadWidget *downloadWidget)
 {
 
+    //ダウンロードアイテム削除ボタンクリック時の紐付け
     connect(downloadWidget, &DownloadWidget::removeClicked, this, &DownloadManagerWidget::remove);
+
     m_itemsLayout->insertWidget(0, downloadWidget, 0, Qt::AlignTop);
     if(m_numDownloads++ == 0)
         m_zeroItemsLabel->hide();
