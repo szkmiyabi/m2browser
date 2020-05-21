@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QWebEngineDownloadItem>
 
+//コンストラクタ
 DownloadManagerWidget::DownloadManagerWidget(QWidget *parent) :
     QWidget(parent),
     m_numDownloads(0)
@@ -16,6 +17,7 @@ DownloadManagerWidget::DownloadManagerWidget(QWidget *parent) :
 }
 
 
+//ダウンロードマネージャーウィンドウを表示する
 void DownloadManagerWidget::downloadRequested(QWebEngineDownloadItem *download)
 {
 
@@ -44,6 +46,7 @@ void DownloadManagerWidget::downloadRequested(QWebEngineDownloadItem *download)
 }
 
 
+//ダウンロードアイテムを追加（ダウンロードの開始）するためのスロット
 void DownloadManagerWidget::add(DownloadWidget *downloadWidget)
 {
 
@@ -55,6 +58,7 @@ void DownloadManagerWidget::add(DownloadWidget *downloadWidget)
 }
 
 
+//ダウンロードアイテムを削除するためのスロット
 void DownloadManagerWidget::remove(DownloadWidget *downloadWidget)
 {
 
