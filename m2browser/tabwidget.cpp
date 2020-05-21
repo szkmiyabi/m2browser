@@ -12,12 +12,14 @@ TabWidget::TabWidget(QWebEngineProfile *profile, QWidget *parent) :
     m_profile(profile)
 {
 
+    //タブバーの設定
     QTabBar *tabBar = this->tabBar();
     tabBar->setTabsClosable(true);
     tabBar->setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
     tabBar->setMovable(true);
     tabBar->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    //コンテキストメニュー、タブ閉じる、タブバーダブルクリック時の紐づけ
     connect(tabBar, &QTabBar::customContextMenuRequested, this, &TabWidget::handleContextMenuRequested);
     connect(tabBar, &QTabBar::tabCloseRequested, this, &TabWidget::closeTab);
     connect(tabBar, &QTabBar::tabBarDoubleClicked, [this](int index) {
@@ -25,11 +27,15 @@ TabWidget::TabWidget(QWebEngineProfile *profile, QWidget *parent) :
             createTab();
     });
 
+    //タブウィジェットがドキュメントに適したレンダリングするための設定
     setDocumentMode(true);
+    //タブテキストは収まらないとき右側を省略
     setElideMode(Qt::ElideRight);
 
+    //タブの選択切り換え時の紐付け
     connect(this, &QTabWidget::currentChanged, this, &TabWidget::handleCurrentChanged);
 
+    //プライベートウィンドウの場合、タブバー左端にそのことが分かるアイコンを表示
     if(profile->isOffTheRecord()) {
         QLabel *icon = new QLabel(this);
         QPixmap pixmap(QStringLiteral(":ninja.png"));
@@ -43,16 +49,20 @@ TabWidget::TabWidget(QWebEngineProfile *profile, QWidget *parent) :
 }
 
 
+//タブを切り替えたときの処理のためのスロット
 void TabWidget::handleCurrentChanged(int index)
 {
 
+    //タブがある時の処理
     if(index != -1) {
 
+        //WebViewクラスのインスタンスポインタを生成
         WebView *view = webView(index);
 
         if(!view->url().isEmpty())
             view->setFocus();
 
+        //シグナルを発動
         emit titleChanged(view->title());
         emit loadProgress(view->loadProgress());
         emit urlChanged(view->url());
@@ -61,6 +71,8 @@ void TabWidget::handleCurrentChanged(int index)
         emit webActionEnabledChanged(QWebEnginePage::Forward, view->isWebActionEnabled(QWebEnginePage::Forward));
         emit webActionEnabledChanged(QWebEnginePage::Stop, view->isWebActionEnabled(QWebEnginePage::Stop));
         emit webActionEnabledChanged(QWebEnginePage::Reload, view->isWebActionEnabled(QWebEnginePage::Reload));
+
+    //タブがないときの処理
     } else {
 
         emit titleChanged(QString());
@@ -76,14 +88,18 @@ void TabWidget::handleCurrentChanged(int index)
 }
 
 
+//タブのコンテキストメニューのためのスロット
 void TabWidget::handleContextMenuRequested(const QPoint &pos)
 {
 
+    //コンテキストメニューの組み立て
     QMenu menu;
     menu.addAction(tr("New &Tab"), this, &TabWidget::createTab, QKeySequence::AddTab);
     int index = tabBar()->tabAt(pos);
 
     if(index != -1) {
+
+        //QActionを組み立ててラムダ式で処理を紐付け
         QAction *action = menu.addAction(tr("Clone Tab"));
         connect(action, &QAction::triggered, this, [this, index]() {
             cloneTab(index);
@@ -119,23 +135,28 @@ void TabWidget::handleContextMenuRequested(const QPoint &pos)
 }
 
 
+//アクティブなWebViewクラスのインスタンスポインタを返す
 WebView *TabWidget::currentWebView() const
 {
     return  webView(currentIndex());
 }
 
 
+//指定したWebViewクラスのインスタンスポインタを返す
 WebView *TabWidget::webView(int index) const
 {
     return qobject_cast<WebView*>(widget(index));
 }
 
 
+//WebViewのセットアアップ
 void TabWidget::setupView(WebView *webView)
 {
 
+    //アクティブなWebView配下のWebページのポインタを取得
     QWebEnginePage *webPage = webView->page();
 
+    //WebViewのタイトル変更時の紐付け
     connect(webView, &QWebEngineView::titleChanged, [this, webView](const QString &title) {
         int index = indexOf(webView);
         if(index != -1) {
@@ -147,6 +168,7 @@ void TabWidget::setupView(WebView *webView)
             emit titleChanged(title);
     });
 
+    //WebViewのURL変更時の紐付け
     connect(webView, &QWebEngineView::urlChanged, [this, webView](const QUrl &url) {
         int index = indexOf(webView);
         if(index != -1)
@@ -156,16 +178,19 @@ void TabWidget::setupView(WebView *webView)
             emit urlChanged(url);
     });
 
+    //WebViewのロード進捗の紐付け
     connect(webView, &QWebEngineView::loadProgress, [this, webView](int progress) {
         if(currentIndex() == indexOf(webView))
             emit loadProgress(progress);
     });
 
+    //WebView配下のWebページのリンクポイント時の紐付け
     connect(webPage, &QWebEnginePage::linkHovered, [this, webView](const QString &url) {
         if(currentIndex() == indexOf(webView))
             emit linkHovered(url);
     });
 
+    //WebViewのファビコン変更時の紐付け
     connect(webView, &WebView::favIconChanged, [this, webView](const QIcon &icon) {
         int index = indexOf(webView);
         if(index != -1)
@@ -175,19 +200,23 @@ void TabWidget::setupView(WebView *webView)
             emit favIconChanged(icon);
     });
 
+    //WebViewの基本動作有効無効化変更時の紐付け
     connect(webView, &WebView::webActionEnabledChanged, [this, webView](QWebEnginePage::WebAction action, bool enabled) {
         if(currentIndex() == indexOf(webView))
             emit webActionEnabledChanged(action, enabled);
     });
 
+    //WebView配下のWebページを閉じる（タブを閉じる）要求時の紐付け
     connect(webPage, &QWebEnginePage::windowCloseRequested, [this, webView]() {
         int index = indexOf(webView);
         if(index >= 0)
             closeTab(index);
     });
 
+    //WebViewでDevTools要求時の紐付け
     connect(webView, &WebView::devToolsRequested, this, &TabWidget::devToolsRequested);
 
+    //WebView配下のWebページの検索結果末尾に到達時の紐付け
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     connect(webPage, &QWebEnginePage::findTextFinished, [this, webView](const QWebEngineFindTextResult &result) {
         if(currentIndex() == indexOf(webView))
@@ -198,14 +227,17 @@ void TabWidget::setupView(WebView *webView)
 }
 
 
+//タブを追加してそのポインタを返す
 WebView *TabWidget::createTab()
 {
     WebView *webView = createBackgroundTab();
+    //CentralWidgetとして配置する
     setCurrentWidget(webView);
     return webView;
 }
 
 
+//バックグラウンドでタブを追加しそのポインタを返す
 WebView *TabWidget::createBackgroundTab()
 {
     WebView *webView = new WebView;
@@ -221,6 +253,7 @@ WebView *TabWidget::createBackgroundTab()
 }
 
 
+//全てのタブをリロードするためのスロット
 void TabWidget::reloadAllTabs()
 {
     for(int i=0; i<count(); ++i)
@@ -228,6 +261,7 @@ void TabWidget::reloadAllTabs()
 }
 
 
+//カレントタブ以外のタブを全て閉じるためのスロット
 void TabWidget::closeOtherTabs(int index)
 {
     for(int i = count() - 1; i > index; --i)
@@ -237,6 +271,7 @@ void TabWidget::closeOtherTabs(int index)
 }
 
 
+//指定したタブを閉じるためのスロット
 void TabWidget::closeTab(int index)
 {
     if(WebView *view = webView(index)) {
@@ -254,6 +289,7 @@ void TabWidget::closeTab(int index)
 }
 
 
+//指定したタブを複製するためのスロット
 void TabWidget::cloneTab(int index)
 {
     if(WebView *view = webView(index)) {
@@ -263,6 +299,7 @@ void TabWidget::cloneTab(int index)
 }
 
 
+//指定したタブにURLを設定するためのスロット
 void TabWidget::setUrl(const QUrl &url)
 {
     if(WebView *view = currentWebView()) {
@@ -272,6 +309,7 @@ void TabWidget::setUrl(const QUrl &url)
 }
 
 
+//Webページの基本動作の無効有効を検知して処理するためのスロット
 void TabWidget::triggerWebPageAction(QWebEnginePage::WebAction action)
 {
     if(WebView *webView = currentWebView()) {
@@ -281,6 +319,7 @@ void TabWidget::triggerWebPageAction(QWebEnginePage::WebAction action)
 }
 
 
+//次のタブを選択するためのスロット
 void TabWidget::nextTab()
 {
     int next = currentIndex() + 1;
@@ -290,6 +329,7 @@ void TabWidget::nextTab()
 }
 
 
+//前のタブを選択するためのスロット
 void TabWidget::previousTab()
 {
     int prev = currentIndex() - 1;
@@ -299,6 +339,7 @@ void TabWidget::previousTab()
 }
 
 
+//指定したタブをリロードするためのスロット
 void TabWidget::reloadTab(int index)
 {
     if(WebView *view = webView(index))
