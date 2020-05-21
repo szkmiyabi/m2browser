@@ -16,10 +16,19 @@ WebPage::WebPage(QWebEngineProfile *profile, QObject *parent) :
     QWebEnginePage(profile, parent)
 {
 
+    //Basic認証要求時の紐付け
     connect(this, &QWebEnginePage::authenticationRequired, this, &WebPage::handleAuthenticationRequired);
+
+    //拡張的機能要求時の紐付け
     connect(this, &QWebEnginePage::featurePermissionRequested, this, &WebPage::handleFeaturePermissionRequested);
+
+    //Proxyサーバ認証要求時の紐付け
     connect(this, &QWebEnginePage::proxyAuthenticationRequired, this, &WebPage::handleProxyAuthenticationRequired);
+
+    //ProtocolHandler登録要求時の紐付け
     connect(this, &QWebEnginePage::registerProtocolHandlerRequested, this, &WebPage::handleRegisterProtocolHandlerRequested);
+
+    //SSLクライアント証明書要求時の紐付け
 #if !defined (QT_NO_SSL) || QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     connect(this, &QWebEnginePage::selectClientCertificate, this, &WebPage::handleSelectClientCertificate);
 #endif
@@ -27,24 +36,34 @@ WebPage::WebPage(QWebEngineProfile *profile, QObject *parent) :
 }
 
 
+//認証エラーダイアログを表示し認証成功失敗のフラグを返す
 bool WebPage::certificateError(const QWebEngineCertificateError &error)
 {
 
+    //このWebページが所属するウィンドウのポインタを取得
     QWidget *mainWindow = view()->window();
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QWebEngineCertificateError deferredError = error;
+    //認証待ち時間を作る処理
     deferredError.defer();
 
+    //非同期に認証判定する。std:moveは右辺値キャスト（コピーでなくムーブ可能にするため）
     QTimer::singleShot(0, mainWindow, [mainWindow, error = std::move(deferredError)]() mutable {
+
+        //mutable:コピーキャプチャされた引数からconst修飾子を削除
+        //認証待ち状態が長すぎてロードが停止された場合
         if(!error.deferred()) {
             QMessageBox::critical(mainWindow, tr("Certificate Error"), error.errorDescription());
+
+        //入力が適切だった場合
         } else {
 
 #else
     if(error.isOverridable()) {
 #endif
 
+            //認証ダイアログのセットアアップ
             QDialog dialog(mainWindow);
             dialog.setModal(true);
             dialog.setWindowFlags(dialog.windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -59,8 +78,10 @@ bool WebPage::certificateError(const QWebEngineCertificateError &error)
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
             if(dialog.exec() == QDialog::Accepted)
+                //証明書エラーを無視して続行
                 error.ignoreCertificateError();
             else
+                //証明書エラーを拒否して続行
                 error.rejectCertificate();
         }
     });
@@ -77,6 +98,7 @@ bool WebPage::certificateError(const QWebEngineCertificateError &error)
 }
 
 
+//Basic認証要求ダイアログ表示のためのスロット
 void WebPage::handleAuthenticationRequired(const QUrl &requestUrl, QAuthenticator *auth)
 {
 
@@ -107,10 +129,10 @@ void WebPage::handleAuthenticationRequired(const QUrl &requestUrl, QAuthenticato
 }
 
 
-
+//拡張的機能要求時の確認ダイアログ表示のためのスロットと補助関数
+//補助関数
 inline QString questionForFeature(QWebEnginePage::Feature feature)
 {
-
     switch (feature) {
     case QWebEnginePage::Geolocation:
         return WebPage::tr("Allow %1 to access your location information?");
@@ -130,7 +152,6 @@ inline QString questionForFeature(QWebEnginePage::Feature feature)
         return WebPage::tr("Allow %1 to show notification on your desktop?");
     }
     return QString();
-
 }
 
 void WebPage::handleFeaturePermissionRequested(const QUrl &securityOrigin, Feature feature)
@@ -146,6 +167,7 @@ void WebPage::handleFeaturePermissionRequested(const QUrl &securityOrigin, Featu
 }
 
 
+//Proxyサーバ認証要求ダイアログ表示のためのスロット
 void WebPage::handleProxyAuthenticationRequired(const QUrl &, QAuthenticator *auth, const QString &proxyHost)
 {
 
@@ -176,6 +198,7 @@ void WebPage::handleProxyAuthenticationRequired(const QUrl &, QAuthenticator *au
 }
 
 
+//ProtocolHandler登録要求ダイアログ表示のためのスロット
 void WebPage::handleRegisterProtocolHandlerRequested(QWebEngineRegisterProtocolHandlerRequest request)
 {
 
@@ -195,6 +218,7 @@ void WebPage::handleRegisterProtocolHandlerRequested(QWebEngineRegisterProtocolH
 }
 
 
+//SSLクライアント証明書要求の処理のためのスロット
 #if !defined (QT_NO_SSL) || QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 void WebPage::handleSelectClientCertificate(QWebEngineClientCertificateSelection selection)
 {
