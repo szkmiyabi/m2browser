@@ -15,6 +15,7 @@ WebPopupWindow::WebPopupWindow(QWebEngineProfile *profile) :
     m_view(new WebView(this))
 {
 
+    //このクラスはポップアップ表示のアプリウィンドウセットアアップの役割
     setAttribute(Qt::WA_DeleteOnClose);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
@@ -30,23 +31,26 @@ WebPopupWindow::WebPopupWindow(QWebEngineProfile *profile) :
     m_urlLineEdit->setReadOnly(true);
     m_urlLineEdit->addAction(m_favAction, QLineEdit::LeadingPosition);
 
+    //通常のアプリウィンドウと同じようにイベントと紐付け
     connect(m_view, &WebView::titleChanged, this, &QWidget::setWindowTitle);
     connect(m_view, &WebView::urlChanged, [this](const QUrl &url){
         m_urlLineEdit->setText(url.toDisplayString());
     });
     connect(m_view, &WebView::favIconChanged, m_favAction, &QAction::setIcon);
-    connect(m_view->page(), &WebPage::geometryChangeRequested, this, &WebPopupWindow::handleGeometryChangeRequested);
     connect(m_view->page(), &WebPage::windowCloseRequested, this, &QWidget::close);
-
+    //Webページのジオメトリ変更要求時に紐付け
+    connect(m_view->page(), &WebPage::geometryChangeRequested, this, &WebPopupWindow::handleGeometryChangeRequested);
 }
 
 
+//このクラス配下のWebViewクラスインスタンスポインタを返す
 WebView *WebPopupWindow::view() const
 {
     return m_view;
 }
 
 
+//Webページのジオメトリ変更要求時のためのスロット
 void WebPopupWindow::handleGeometryChangeRequested(const QRect &newGeometry)
 {
 
