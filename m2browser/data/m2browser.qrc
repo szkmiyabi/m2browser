@@ -10,5 +10,9 @@
         <file alias="process-stop.png">3rdparty/process-stop.png</file>
         <file alias="text-html.png">3rdparty/text-html.png</file>
         <file alias="view-refresh.png">3rdparty/view-refresh.png</file>
+        <file alias="cmb-next.png">3rdparty/cmb-next.png</file>
+        <file alias="cmb-previous.png">3rdparty/cmb-previous.png</file>
+        <file alias="go-home.png">3rdparty/go-home.png</file>
+        <file alias="open-file.png">3rdparty/open-file.png</file>
     </qresource>
 </RCC>

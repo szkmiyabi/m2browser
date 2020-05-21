@@ -4,10 +4,12 @@
 #include <QMainWindow>
 #include <QTime>
 #include <QWebEnginePage>
+#include <QComboBox>
 
 QT_BEGIN_NAMESPACE
 class QLineEdit;        //QLineEditクラスを暗黙参照
 class QProgressBar;     //QProgressBarクラスを暗黙参照
+class QComboBox;
 QT_END_NAMESPACE
 
 class Browser;          //Browserクラスを参照
@@ -74,6 +76,17 @@ private slots:
     void handleFindTextFinished(const QWebEngineFindTextResult &result);
 #endif
 
+    //TSVファイル読み込み要求の処理のためのスロット
+    void handleTsvFileOpenRequested();
+
+
+    //前のコンボに進む要求時の処理のためのスロット
+    void handleComboForwardRequested();
+
+    //次のコンボに進む要求時の処理のためのスロット
+    void handleComboBackRequested();
+
+
 private:
 
     //ファイルメニューを生成
@@ -87,19 +100,29 @@ private:
     //ツールバーを生成
     QToolBar *createToolBar();
 
+    //コンボで選択したページに切替
+    void handleComboCurrentChanged(int index);
+
 private:
-    Browser *m_browser;                 //Browserクラスのインスタンスポインタ
-    QWebEngineProfile *m_profile;       //QWebEngineProfile（通常/プライベート切替用)のポインタ
-    TabWidget *m_tabWidget;             //TabWidgetクラスのインスタンスポインタ
-    QProgressBar *m_progressBar;        //ProgressBarのポインタ
-    QAction *m_historyBackAction;       //戻るActionのポインタ
-    QAction *m_historyForwardAction;    //進むActionのポインタ
-    QAction *m_stopAction;              //停止Actionのポインタ
-    QAction *m_reloadAction;            //更新Actionのポインタ
-    QAction *m_stopReloadAction;        //更新停止Actionのポインタ
-    QLineEdit *m_urlLineEdit;           //URL欄のポインタ
-    QAction *m_favAction;               //ファビコン表示Actionのポインタ
-    QString m_lastSearch;               //ページ内検索の末尾検索結果文字列
+    Browser *m_browser;                     //Browserクラスのインスタンスポインタ
+    QWebEngineProfile *m_profile;           //QWebEngineProfile（通常/プライベート切替用)のポインタ
+    TabWidget *m_tabWidget;                 //TabWidgetクラスのインスタンスポインタ
+    QProgressBar *m_progressBar;            //ProgressBarのポインタ
+    QAction *m_historyBackAction;           //戻るActionのポインタ
+    QAction *m_historyForwardAction;        //進むActionのポインタ
+    QAction *m_stopAction;                  //停止Actionのポインタ
+    QAction *m_reloadAction;                //更新Actionのポインタ
+    QAction *m_stopReloadAction;            //更新停止Actionのポインタ
+    QLineEdit *m_urlLineEdit;               //URL欄のポインタ
+    QAction *m_favAction;                   //ファビコン表示Actionのポインタ
+    QString m_lastSearch;                   //ページ内検索の末尾検索結果文字列
+
+    QComboBox *m_urlComboBox;               //URL選択コンボのポインタ
+    QVector<QVector<QString>> m_urlArr;     //URL配列
+    int m_urlArrIndex;                       //配列カウンタ
+    QAction *m_openTsvAction;               //TSVファイルを開くAction
+    QAction *m_comboForwardAction;
+    QAction *m_comboBackAction;
 
 };
 

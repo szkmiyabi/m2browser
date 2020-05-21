@@ -33,7 +33,11 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
     m_reloadAction(nullptr),
     m_stopReloadAction(nullptr),
     m_urlLineEdit(nullptr),
-    m_favAction(nullptr)
+    m_favAction(nullptr),
+    m_urlArrIndex(0),
+    m_openTsvAction(nullptr),
+    m_comboForwardAction(nullptr),
+    m_comboBackAction(nullptr)
 {
 
     //closeイベントが届いたら自動でdeleteする設定
@@ -150,6 +154,8 @@ QMenu *BrowserWindow::createFileMenu(TabWidget *tabWidget)
 
     //ウェブリソースを開くコマンドの定義と登録
     fileMenu->addAction(tr("&Open File..."), this, &BrowserWindow::handleFileOpenTriggered, QKeySequence::Open);
+
+
 
     fileMenu->addSeparator();
 
@@ -337,6 +343,45 @@ QToolBar *BrowserWindow::createToolBar()
     navigationBar->setMovable(false);
     navigationBar->toggleViewAction()->setEnabled(false);
 
+    //URL選択コンボ
+    m_urlComboBox = new QComboBox(this);
+    m_urlComboBox->setEditable(true);
+    connect(m_urlComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
+        handleComboCurrentChanged(index);
+    });
+    navigationBar->addWidget(m_urlComboBox);
+
+    //URL欄
+    m_urlLineEdit = new QLineEdit(this);
+    m_favAction = new QAction(this);
+    m_urlLineEdit->addAction(m_favAction, QLineEdit::LeadingPosition);
+    m_urlLineEdit->setClearButtonEnabled(true);
+    navigationBar->addWidget(m_urlLineEdit);
+
+    //TSVファイル開くボタン
+    m_openTsvAction = new QAction(this);
+    m_openTsvAction->setIconVisibleInMenu(false);
+    m_openTsvAction->setIcon(QIcon(QStringLiteral(":open-file.png")));
+    m_openTsvAction->setToolTip(tr("Open tsv file with PID and URL"));
+    connect(m_openTsvAction, &QAction::triggered, this, &BrowserWindow::handleTsvFileOpenRequested);
+    navigationBar->addAction(m_openTsvAction);
+
+    //combo戻るボタン
+    m_comboBackAction = new QAction(this);
+    m_comboBackAction->setIconVisibleInMenu(false);
+    m_comboBackAction->setIcon(QIcon(QStringLiteral(":cmb-previous.png")));
+    m_comboBackAction->setToolTip(tr("Back combo pid"));
+    connect(m_comboBackAction, &QAction::triggered, this, &BrowserWindow::handleComboBackRequested);
+    navigationBar->addAction(m_comboBackAction);
+
+    //combo進むボタン
+    m_comboForwardAction = new QAction(this);
+    m_comboForwardAction->setIconVisibleInMenu(false);
+    m_comboForwardAction->setIcon(QIcon(QStringLiteral(":cmb-next.png")));
+    m_comboForwardAction->setToolTip(tr("Forward combo pid"));
+    connect(m_comboForwardAction, &QAction::triggered, this, &BrowserWindow::handleComboForwardRequested);
+    navigationBar->addAction(m_comboForwardAction);
+
     //戻るボタン
     m_historyBackAction = new QAction(this);
     QList<QKeySequence> backShortcuts = QKeySequence::keyBindings(QKeySequence::Back);
@@ -377,6 +422,7 @@ QToolBar *BrowserWindow::createToolBar()
     });
     navigationBar->addAction(m_historyForwardAction);
 
+
     //更新/更新停止ボタン
     m_stopReloadAction = new QAction(this);
     connect(m_stopReloadAction, &QAction::triggered, [this]() {
@@ -384,12 +430,6 @@ QToolBar *BrowserWindow::createToolBar()
     });
     navigationBar->addAction(m_stopReloadAction);
 
-    //URL欄
-    m_urlLineEdit = new QLineEdit(this);
-    m_favAction = new QAction(this);
-    m_urlLineEdit->addAction(m_favAction, QLineEdit::LeadingPosition);
-    m_urlLineEdit->setClearButtonEnabled(true);
-    navigationBar->addWidget(m_urlLineEdit);
 
     //ダウンロードマネージャーボタン
     auto downloadsAction = new QAction(this);
@@ -598,3 +638,124 @@ void BrowserWindow::handleFindTextFinished(const QWebEngineFindTextResult &resul
     }
 }
 #endif
+
+
+//TSVファイル読み込み要求の処理のためのスロット
+void BrowserWindow::handleTsvFileOpenRequested()
+{
+    QString path = QFileDialog::getOpenFileName(
+                this,
+                tr("Choose a tsv file"),
+                QString(),
+                tr("tsv file(*.txt)")
+    );
+
+    if(path.isEmpty())
+        return;
+
+    if(m_urlArr.size() > 0) {
+        m_urlArr.clear();
+        m_urlComboBox->clear();
+    }
+
+    QFile fp(path);
+    if(!fp.open(QIODevice::ReadOnly))
+        return;
+
+    QTextStream sr(&fp);
+    while(!sr.atEnd()) {
+        QString line = sr.readLine(0);
+        QList<QString> tmp = line.split("\t");
+        QVector<QString> row;
+        row.append(tmp.at(0));
+        row.append(tmp.at(1));
+        m_urlArr.append(row);
+    }
+
+    fp.close();
+
+    m_urlArrIndex = 0;
+    foreach(const QVector<QString> &row, m_urlArr) {
+        m_urlComboBox->addItem(row.at(0));
+    }
+
+    const QVector<QString> row = m_urlArr.at(0);
+    currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
+    m_urlComboBox->setCurrentIndex(0);
+
+}
+
+
+//コンボで選択したページに切替
+void BrowserWindow::handleComboCurrentChanged(int index)
+{
+    if(m_urlArr.size() == 0)
+        return;
+
+    m_urlArrIndex = index;
+    const QVector<QString> row = m_urlArr.at(index);
+    currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
+}
+
+
+//前のコンボに進む要求時の処理のためのスロット
+void BrowserWindow::handleComboBackRequested()
+{
+    if(m_urlArr.size() == 0)
+        return;
+    if(m_urlArrIndex == 0) {
+        QMessageBox::information(
+                    this,
+                    tr("Error"),
+                    tr("Can't back page.")
+        );
+        return;
+    }
+    m_urlArrIndex--;
+    const QVector<QString> row = m_urlArr.at(m_urlArrIndex);
+    currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
+    m_urlComboBox->setCurrentIndex(m_urlArrIndex);
+}
+
+
+//次のコンボに進む要求時の処理のためのスロット
+void BrowserWindow::handleComboForwardRequested()
+{
+    if(m_urlArr.size() == 0)
+        return;
+    if(m_urlArrIndex == (m_urlArr.size() - 1)) {
+        QMessageBox::information(
+                    this,
+                    tr("Error"),
+                    tr("Can't forward page.")
+        );
+        return;
+    }
+    m_urlArrIndex++;
+    const QVector<QString> row = m_urlArr.at(m_urlArrIndex);
+    currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
+    m_urlComboBox->setCurrentIndex(m_urlArrIndex);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
