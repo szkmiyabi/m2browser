@@ -79,13 +79,11 @@ private slots:
     //TSVファイル読み込み要求の処理のためのスロット
     void handleTsvFileOpenRequested();
 
-
     //前のコンボに進む要求時の処理のためのスロット
     void handleComboForwardRequested();
 
     //次のコンボに進む要求時の処理のためのスロット
     void handleComboBackRequested();
-
 
 private:
 
@@ -121,8 +119,8 @@ private:
     QVector<QVector<QString>> m_urlArr;     //URL配列
     int m_urlArrIndex;                       //配列カウンタ
     QAction *m_openTsvAction;               //TSVファイルを開くAction
-    QAction *m_comboForwardAction;
-    QAction *m_comboBackAction;
+    QAction *m_comboForwardAction;          //URL選択コンボ進むActionのポインタ
+    QAction *m_comboBackAction;             //URL選択コンボ戻るActionのポインタ
 
 };
 

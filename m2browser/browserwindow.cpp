@@ -737,25 +737,3 @@ void BrowserWindow::handleComboForwardRequested()
     m_urlComboBox->setCurrentIndex(m_urlArrIndex);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
