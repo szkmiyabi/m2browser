@@ -382,6 +382,8 @@ QToolBar *BrowserWindow::createToolBar()
     //URL選択コンボ
     m_urlComboBox = new QComboBox(this);
     m_urlComboBox->setEditable(true);
+    m_urlComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);    //幅の自動調整
+    m_urlComboBox->setMaxVisibleItems(20);                              //20行高で表示
     connect(m_urlComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
         handleComboCurrentChanged(index);
     });
@@ -469,7 +471,7 @@ QToolBar *BrowserWindow::createToolBar()
     auto jsAction = new QAction(this);
     jsAction->setIcon(QIcon(QStringLiteral(":ninja.svg")));
     connect(jsAction, &QAction::triggered, [this]() {
-        currentTab()->page()->runJavaScript(m_jsUtil->css_cut());
+        currentTab()->page()->runJavaScript(m_jsUtil->wai_aria_attr());
     });
     navigationBar->addAction(jsAction);
 
