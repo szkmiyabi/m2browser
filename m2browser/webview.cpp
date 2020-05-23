@@ -172,6 +172,7 @@ void WebView::contextMenuEvent(QContextMenuEvent *event)
 
     QMenu *menu = page()->createStandardContextMenu();
     const QList<QAction *> actions = menu->actions();
+
     auto inspectElement = std::find(actions.cbegin(), actions.cend(), page()->action(QWebEnginePage::InspectElement));
 
     if(inspectElement == actions.cend()) {
@@ -190,6 +191,20 @@ void WebView::contextMenuEvent(QContextMenuEvent *event)
     } else {
         (*inspectElement)->setText(tr("Inspect element"));
     }
+
+    /*
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    QMenu *menu = new QMenu(this);
+
+    QAction *viewSource = menu->addAction(tr(u8"ソースコードを表示"));
+    connect(viewSource, &QAction::triggered, [this]() {
+        page()->triggerAction(QWebEnginePage::ViewSource);
+    });
+    QAction *inspectElement = menu->addAction(tr(u8"要素を調査"));
+    connect(inspectElement, &QAction::triggered, [this]() {
+        emit devToolsRequested(page());
+    });
+    */
 
     menu->popup(event->globalPos());
 

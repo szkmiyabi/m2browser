@@ -42,6 +42,7 @@ signals:
     void favIconChanged(const QIcon &icon);
     void devToolsRequested(QWebEnginePage *source);
 
+
 private:
 
     //Webページの基本動作の有効無効化のシグナルを生成する

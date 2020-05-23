@@ -156,6 +156,11 @@ void TabWidget::setupView(WebView *webView)
     //アクティブなWebView配下のWebページのポインタを取得
     QWebEnginePage *webPage = webView->page();
 
+    //右クリックメニューから進む/戻る/更新を除去
+    webView->page()->action(QWebEnginePage::Back)->setVisible(false);
+    webView->page()->action(QWebEnginePage::Forward)->setVisible(false);
+    webView->page()->action(QWebEnginePage::Reload)->setVisible(false);
+
     //WebViewのタイトル変更時の紐付け
     connect(webView, &QWebEngineView::titleChanged, [this, webView](const QString &title) {
         int index = indexOf(webView);
@@ -317,7 +322,6 @@ void TabWidget::triggerWebPageAction(QWebEnginePage::WebAction action)
         webView->setFocus();
     }
 }
-
 
 //次のタブを選択するためのスロット
 void TabWidget::nextTab()
