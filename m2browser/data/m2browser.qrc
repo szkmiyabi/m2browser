@@ -15,5 +15,14 @@
         <file>text-html.svg</file>
         <file>view-refresh.svg</file>
         <file>ninja.svg</file>
+        <file alias="sim-csscut.svg">secondary_toolbar/sim-csscut.svg</file>
+        <file alias="sim-alt-attr.svg">secondary_toolbar/sim-alt-attr.svg</file>
+        <file alias="sim-target-attr.svg">secondary_toolbar/sim-target-attr.svg</file>
+        <file alias="sim-doc-link.svg">secondary_toolbar/sim-doc-link.svg</file>
+        <file alias="sim-label-and-title.svg">secondary_toolbar/sim-label-and-title.svg</file>
+        <file alias="sim-lang-attr.svg">secondary_toolbar/sim-lang-attr.svg</file>
+        <file alias="sim-semantic.svg">secondary_toolbar/sim-semantic.svg</file>
+        <file alias="sim-wai-aria.svg">secondary_toolbar/sim-wai-aria.svg</file>
+        <file alias="sim-superfocus.svg">secondary_toolbar/sim-superfocus.svg</file>
     </qresource>
 </RCC>

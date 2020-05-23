@@ -101,6 +101,8 @@ private:
     QMenu *createWindowMenu(TabWidget *tabWidget);
     //ツールバーを生成
     QToolBar *createToolBar();
+    //セカンダリツールバーを生成
+    QToolBar *createSecondToolBar();
 
     //コンボで選択したページに切替
     void handleComboCurrentChanged(int index);

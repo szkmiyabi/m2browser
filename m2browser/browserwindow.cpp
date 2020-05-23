@@ -50,19 +50,6 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
     //マウスクリックのみでフォーカスを移す設定
     setFocusPolicy(Qt::ClickFocus);
 
-    //通常のウィンドウの場合ツールバーとメニューバー表示
-    if(!forDevTools) {
-        m_progressBar = new QProgressBar(this);
-
-        QToolBar *toolbar = createToolBar();
-        addToolBar(toolbar);
-
-        menuBar()->addMenu(createFileMenu(m_tabWidget));
-        menuBar()->addMenu(createEditMenu());
-        menuBar()->addMenu(createViewMenu(toolbar));
-        menuBar()->addMenu(createWindowMenu(m_tabWidget));
-    }
-
     //レイアウトコンテナの設定
     QWidget *centralWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout;
@@ -70,17 +57,28 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    //通常のウィンドウの場合progressバーを表示
+    //通常のウィンドウの場合ツールバーとメニューバー表示とprogressバーを表示
     if(!forDevTools) {
+        m_progressBar = new QProgressBar(this);
+        QToolBar *toolbar = createToolBar();
+
+        menuBar()->addMenu(createFileMenu(m_tabWidget));
+        menuBar()->addMenu(createEditMenu());
+        menuBar()->addMenu(createViewMenu(toolbar));
+        menuBar()->addMenu(createWindowMenu(m_tabWidget));
+        layout->addWidget(toolbar);
+
         addToolBarBreak();
+        layout->addWidget(createSecondToolBar());
 
         m_progressBar->setMaximumHeight(1);
         m_progressBar->setTextVisible(false);
         m_progressBar->setStyleSheet(QStringLiteral(
-            "QProgressBar {border: 0px} QProgressBar::chunk {background-color: #00C000}"
+            "QProgressBar {border: 0px; background-color: #F0F0F0} QProgressBar::chunk {background-color: #00C000}"
         ));
 
         layout->addWidget(m_progressBar);
+
     }
 
     //CentralWidget（ウィンドウいっぱいの幅高さにする）の設定
@@ -467,15 +465,92 @@ QToolBar *BrowserWindow::createToolBar()
         m_browser->downloadManagerWidget().show();
     });
 
+    return navigationBar;
 
-    auto jsAction = new QAction(this);
-    jsAction->setIcon(QIcon(QStringLiteral(":ninja.svg")));
-    connect(jsAction, &QAction::triggered, [this]() {
+}
+
+
+//セカンダリツールバーを生成
+QToolBar *BrowserWindow::createSecondToolBar()
+{
+
+    QToolBar *secondToolBar = new QToolBar(tr("Simulations"));
+    secondToolBar->setMovable(false);
+    secondToolBar->toggleViewAction()->setEnabled(false);
+
+    //CSSカットシミュレーション要求を紐付け
+    auto cssCutAction = new QAction(this);
+    cssCutAction->setIcon(QIcon(QStringLiteral(":sim-csscut.svg")));
+    connect(cssCutAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->css_cut());
+    });
+    secondToolBar->addAction(cssCutAction);
+
+    //alt属性値シミュレーション要求を紐付け
+    auto altAttrAction = new QAction(this);
+    altAttrAction->setIcon(QIcon(QStringLiteral(":sim-alt-attr.svg")));
+    connect(altAttrAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->image_alt());
+    });
+    secondToolBar->addAction(altAttrAction);
+
+    //target属性値シミュレーション要求を紐付け
+    auto targetAttrAction = new QAction(this);
+    targetAttrAction->setIcon(QIcon(QStringLiteral(":sim-target-attr.svg")));
+    connect(targetAttrAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->target_attr());
+    });
+    secondToolBar->addAction(targetAttrAction);
+
+    //ドキュメントリンクシミュレーション要求を紐付け
+    auto documentLinkAction = new QAction(this);
+    documentLinkAction->setIcon(QIcon(QStringLiteral(":sim-doc-link.svg")));
+    connect(documentLinkAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->document_link());
+    });
+    secondToolBar->addAction(documentLinkAction);
+
+    //lang属性値シミュレーション要求を紐付け
+    auto langAttrAction = new QAction(this);
+    langAttrAction->setIcon(QIcon(QStringLiteral(":sim-lang-attr.svg")));
+    connect(langAttrAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->lang_attr());
+    });
+    secondToolBar->addAction(langAttrAction);
+
+    //フォームラベルとtitle属性値シミュレーション要求を紐付け
+    auto labelAndTitleAction = new QAction(this);
+    labelAndTitleAction->setIcon(QIcon(QStringLiteral(":sim-label-and-title.svg")));
+    connect(labelAndTitleAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->tag_label_and_title_attr());
+    });
+    secondToolBar->addAction(labelAndTitleAction);
+
+    //文書構造解析シミュレーション要求を紐付け
+    auto semanticAction = new QAction(this);
+    semanticAction->setIcon(QIcon(QStringLiteral(":sim-semantic.svg")));
+    connect(semanticAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->semantic_check());
+    });
+    secondToolBar->addAction(semanticAction);
+
+    //フォーカスシミュレーション要求を紐付け
+    auto superFocusAction = new QAction(this);
+    superFocusAction->setIcon(QIcon(QStringLiteral(":sim-superfocus.svg")));
+    connect(superFocusAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->super_focus());
+    });
+    secondToolBar->addAction(superFocusAction);
+
+    //WAI-ARIA属性値シミュレーション要求を紐付け
+    auto waiAriaAction = new QAction(this);
+    waiAriaAction->setIcon(QIcon(QStringLiteral(":sim-wai-aria.svg")));
+    connect(waiAriaAction, &QAction::triggered, [this]() {
         currentTab()->page()->runJavaScript(m_jsUtil->wai_aria_attr());
     });
-    navigationBar->addAction(jsAction);
+    secondToolBar->addAction(waiAriaAction);
 
-    return navigationBar;
+    return secondToolBar;
 
 }
 
