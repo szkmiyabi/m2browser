@@ -117,13 +117,13 @@ void DownloadWidget::updateWidget()
 
     //ダウンロード中はキャンセルボタン表示
     if(state == QWebEngineDownloadItem::DownloadInProgress) {
-        static QIcon cancelIcon(QStringLiteral(":process-stop.png"));
+        static QIcon cancelIcon(QStringLiteral(":process-stop.svg"));
         m_cancelButton->setIcon(cancelIcon);
         m_cancelButton->setToolTip(tr("Stop downloading"));
 
     //それ以外は削除ボタン表示
     } else {
-        static QIcon removeIcon(QStringLiteral(":edit-clear.png"));
+        static QIcon removeIcon(QStringLiteral(":edit-clear.svg"));
         m_cancelButton->setIcon(removeIcon);
         m_cancelButton->setToolTip(tr("Remove from list"));
     }

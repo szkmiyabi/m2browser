@@ -22,7 +22,7 @@
 #include <QWebEngineProfile>
 
 //コンストラクタ
-BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool forDevTools) :
+BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool forDevTools, QUrl homeUrl) :
     m_browser(browser),
     m_profile(profile),
     m_tabWidget(new TabWidget(profile, this)), //TabWidgetクラスのインスタンスへのポインタ
@@ -37,7 +37,10 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
     m_urlArrIndex(0),
     m_openTsvAction(nullptr),
     m_comboForwardAction(nullptr),
-    m_comboBackAction(nullptr)
+    m_comboBackAction(nullptr),
+    m_homeUrlAction(nullptr),
+    m_comboReloadAction(nullptr),
+    m_homeUrl(homeUrl)
 {
 
     //closeイベントが届いたら自動でdeleteする設定
@@ -343,6 +346,37 @@ QToolBar *BrowserWindow::createToolBar()
     navigationBar->setMovable(false);
     navigationBar->toggleViewAction()->setEnabled(false);
 
+    //TSVファイル開くボタン
+    m_openTsvAction = new QAction(this);
+    m_openTsvAction->setIconVisibleInMenu(false);
+    m_openTsvAction->setIcon(QIcon(QStringLiteral(":open-file.svg")));
+    m_openTsvAction->setToolTip(tr("Open tsv file with PID and URL"));
+    connect(m_openTsvAction, &QAction::triggered, this, &BrowserWindow::handleTsvFileOpenRequested);
+    navigationBar->addAction(m_openTsvAction);
+
+    //combo戻るボタン
+    m_comboBackAction = new QAction(this);
+    m_comboBackAction->setIconVisibleInMenu(false);
+    m_comboBackAction->setIcon(QIcon(QStringLiteral(":cmb-previous.svg")));
+    m_comboBackAction->setToolTip(tr("Back combo pid"));
+    connect(m_comboBackAction, &QAction::triggered, this, &BrowserWindow::handleComboBackRequested);
+    navigationBar->addAction(m_comboBackAction);
+
+    //combo進むボタン
+    m_comboForwardAction = new QAction(this);
+    m_comboForwardAction->setIconVisibleInMenu(false);
+    m_comboForwardAction->setIcon(QIcon(QStringLiteral(":cmb-next.svg")));
+    m_comboForwardAction->setToolTip(tr("Forward combo pid"));
+    connect(m_comboForwardAction, &QAction::triggered, this, &BrowserWindow::handleComboForwardRequested);
+    navigationBar->addAction(m_comboForwardAction);
+
+    //combo再読込ボタン
+    m_comboReloadAction = new QAction(this);
+    m_comboReloadAction->setIconVisibleInMenu(false);
+    m_comboReloadAction->setIcon(QIcon(QStringLiteral(":cmb-refresh.svg")));
+    connect(m_comboReloadAction, &QAction::triggered, this, &BrowserWindow::handleComboReloadRequested);
+    navigationBar->addAction(m_comboReloadAction);
+
     //URL選択コンボ
     m_urlComboBox = new QComboBox(this);
     m_urlComboBox->setEditable(true);
@@ -351,6 +385,11 @@ QToolBar *BrowserWindow::createToolBar()
     });
     navigationBar->addWidget(m_urlComboBox);
 
+    //スペーサー
+    QWidget *spacer = new QWidget(this);
+    spacer->setFixedWidth(8);
+    navigationBar->addWidget(spacer);
+
     //URL欄
     m_urlLineEdit = new QLineEdit(this);
     m_favAction = new QAction(this);
@@ -358,29 +397,15 @@ QToolBar *BrowserWindow::createToolBar()
     m_urlLineEdit->setClearButtonEnabled(true);
     navigationBar->addWidget(m_urlLineEdit);
 
-    //TSVファイル開くボタン
-    m_openTsvAction = new QAction(this);
-    m_openTsvAction->setIconVisibleInMenu(false);
-    m_openTsvAction->setIcon(QIcon(QStringLiteral(":open-file.png")));
-    m_openTsvAction->setToolTip(tr("Open tsv file with PID and URL"));
-    connect(m_openTsvAction, &QAction::triggered, this, &BrowserWindow::handleTsvFileOpenRequested);
-    navigationBar->addAction(m_openTsvAction);
-
-    //combo戻るボタン
-    m_comboBackAction = new QAction(this);
-    m_comboBackAction->setIconVisibleInMenu(false);
-    m_comboBackAction->setIcon(QIcon(QStringLiteral(":cmb-previous.png")));
-    m_comboBackAction->setToolTip(tr("Back combo pid"));
-    connect(m_comboBackAction, &QAction::triggered, this, &BrowserWindow::handleComboBackRequested);
-    navigationBar->addAction(m_comboBackAction);
-
-    //combo進むボタン
-    m_comboForwardAction = new QAction(this);
-    m_comboForwardAction->setIconVisibleInMenu(false);
-    m_comboForwardAction->setIcon(QIcon(QStringLiteral(":cmb-next.png")));
-    m_comboForwardAction->setToolTip(tr("Forward combo pid"));
-    connect(m_comboForwardAction, &QAction::triggered, this, &BrowserWindow::handleComboForwardRequested);
-    navigationBar->addAction(m_comboForwardAction);
+    //Homeボタン
+    m_homeUrlAction = new QAction(this);
+    m_homeUrlAction->setIconVisibleInMenu(false);
+    m_homeUrlAction->setIcon(QIcon(QStringLiteral(":go-home.svg")));
+    m_homeUrlAction->setToolTip(tr("Back to the default page."));
+    connect(m_homeUrlAction, &QAction::triggered, [this]() {
+        currentTab()->setUrl(m_homeUrl);
+    });
+    navigationBar->addAction(m_homeUrlAction);
 
     //戻るボタン
     m_historyBackAction = new QAction(this);
@@ -396,7 +421,7 @@ QToolBar *BrowserWindow::createToolBar()
     backShortcuts.append(QKeySequence(Qt::Key_Back));
     m_historyBackAction->setShortcuts(backShortcuts);
     m_historyBackAction->setIconVisibleInMenu(false);
-    m_historyBackAction->setIcon(QIcon(QStringLiteral(":go-previous.png")));
+    m_historyBackAction->setIcon(QIcon(QStringLiteral(":go-previous.svg")));
     m_historyBackAction->setToolTip(tr("Go Back in history"));
     connect(m_historyBackAction, &QAction::triggered, [this]() {
         m_tabWidget->triggerWebPageAction(QWebEnginePage::Back);
@@ -415,13 +440,12 @@ QToolBar *BrowserWindow::createToolBar()
     fwdShortcuts.append(QKeySequence(Qt::Key_Forward));
     m_historyForwardAction->setShortcuts(fwdShortcuts);
     m_historyForwardAction->setIconVisibleInMenu(false);
-    m_historyForwardAction->setIcon(QIcon(QStringLiteral(":go-next.png")));
+    m_historyForwardAction->setIcon(QIcon(QStringLiteral(":go-next.svg")));
     m_historyForwardAction->setToolTip(tr("Go Forward in history"));
     connect(m_historyForwardAction, &QAction::triggered, [this]() {
         m_tabWidget->triggerWebPageAction(QWebEnginePage::Forward);
     });
     navigationBar->addAction(m_historyForwardAction);
-
 
     //更新/更新停止ボタン
     m_stopReloadAction = new QAction(this);
@@ -430,10 +454,9 @@ QToolBar *BrowserWindow::createToolBar()
     });
     navigationBar->addAction(m_stopReloadAction);
 
-
     //ダウンロードマネージャーボタン
     auto downloadsAction = new QAction(this);
-    downloadsAction->setIcon(QIcon(QStringLiteral(":go-bottom.png")));
+    downloadsAction->setIcon(QIcon(QStringLiteral(":go-bottom.svg")));
     downloadsAction->setToolTip(tr("Show downloads"));
     navigationBar->addAction(downloadsAction);
     connect(downloadsAction, &QAction::triggered, [this]() {
@@ -484,6 +507,7 @@ void BrowserWindow::handleWebViewTitleChanged(const QString &title)
 void BrowserWindow::handleNewWindowTriggered()
 {
     BrowserWindow *window = m_browser->createWindow();
+    window->tabWidget()->setUrl(m_homeUrl);
     window->m_urlLineEdit->setFocus();
 }
 
@@ -492,6 +516,7 @@ void BrowserWindow::handleNewWindowTriggered()
 void BrowserWindow::handleNewIncognitoWindowTriggered()
 {
     BrowserWindow *window = m_browser->createWindow(true); //offTheRecord=true
+    window->tabWidget()->setUrl(m_homeUrl);
     window->m_urlLineEdit->setFocus();
 }
 
@@ -585,8 +610,8 @@ WebView *BrowserWindow::currentTab() const
 //ページロード進捗に応じた更新/更新停止ボタンに切り換えるためのスロット
 void BrowserWindow::handleWebViewLoadProgress(int progress)
 {
-    static QIcon stopIcon(QStringLiteral(":process-stop.png"));
-    static QIcon reloadIcon(QStringLiteral(":view-refresh.png"));
+    static QIcon stopIcon(QStringLiteral(":process-stop.svg"));
+    static QIcon reloadIcon(QStringLiteral(":view-refresh.svg"));
 
     if(0 < progress && progress < 100) {
         m_stopReloadAction->setData(QWebEnginePage::Stop);
@@ -735,5 +760,15 @@ void BrowserWindow::handleComboForwardRequested()
     const QVector<QString> row = m_urlArr.at(m_urlArrIndex);
     currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
     m_urlComboBox->setCurrentIndex(m_urlArrIndex);
+}
+
+
+//コンボ再読込要求時の処理のためのスロット
+void BrowserWindow::handleComboReloadRequested()
+{
+    if(m_urlArr.size() == 0)
+        return;
+    const QVector<QString> row = m_urlArr.at(m_urlArrIndex);
+    currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
 }
 

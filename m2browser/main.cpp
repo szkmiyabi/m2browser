@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     QUrl url = commandLineUrlArgument();
 
     //browser（ウィンドウマネージャ的クラス）のインスタンス
-    Browser browser;
+    Browser browser(url);
     //最低1個のウィンドウは生成しておく
     //browserインスタンスからBrowserWindowインスタンスのポインタを受け取る
     BrowserWindow *window = browser.createWindow();

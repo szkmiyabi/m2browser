@@ -5,6 +5,7 @@
 
 #include <QVector>
 #include <QWebEngineProfile>
+#include <QUrl>
 
 class BrowserWindow;        //BrowserWindowクラスを参照
 
@@ -13,7 +14,7 @@ class Browser
 public:
 
     //コンストラクタ
-    Browser();
+    Browser(QUrl homeUrl = QUrl());
 
     //windowオブジェクトのベクター
     QVector<BrowserWindow*> windows() { return m_windows; }
@@ -27,6 +28,7 @@ public:
     //DownloadManagerWidgetの参照を返す
     DownloadManagerWidget &downloadManagerWidget() { return m_downloadManagerWidget; }
 
+
 private:
 
     //アプリウィンドウのポインタのベクター
@@ -38,5 +40,6 @@ private:
     //ポインタ登録されたプライベートウィンドウ用QWebEngineProfileクラス（通常/プライベートの切替用）
     QScopedPointer<QWebEngineProfile> m_otrProfile;
 
+    QUrl m_homeUrl;         //規定のURL
 };
 #endif // BROWSER_H

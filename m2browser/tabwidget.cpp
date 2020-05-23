@@ -38,11 +38,11 @@ TabWidget::TabWidget(QWebEngineProfile *profile, QWidget *parent) :
     //プライベートウィンドウの場合、タブバー左端にそのことが分かるアイコンを表示
     if(profile->isOffTheRecord()) {
         QLabel *icon = new QLabel(this);
-        QPixmap pixmap(QStringLiteral(":ninja.png"));
-        icon->setPixmap(pixmap.scaledToHeight(tabBar->height()));
+        QPixmap pixmap(QStringLiteral(":ninja.svg"));
+        icon->setPixmap(pixmap.scaled(24, 24));
         setStyleSheet(
              QStringLiteral("QTabWidget::tab-bar { left: %1px; }")
-            .arg(icon->pixmap()->width())
+            .arg(icon->pixmap()->width() + 5)
         );
     }
 

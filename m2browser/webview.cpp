@@ -116,13 +116,13 @@ QIcon WebView::favIcon() const
         return favIcon;
 
     if(m_loadProgress < 0) {
-        static QIcon errorIcon(QStringLiteral(":dialog-error.png"));
+        static QIcon errorIcon(QStringLiteral(":dialog-error.svg"));
         return errorIcon;
     } else if(m_loadProgress < 100) {
-        static QIcon loadingIcon(QStringLiteral(":view-refresh.png"));
+        static QIcon loadingIcon(QStringLiteral(":view-refresh.svg"));
         return loadingIcon;
     } else {
-        static QIcon defaultIcon(QStringLiteral(":text-html.png"));
+        static QIcon defaultIcon(QStringLiteral(":text-html.svg"));
         return defaultIcon;
     }
 }

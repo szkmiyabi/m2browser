@@ -3,7 +3,8 @@
 
 
 //コンストラクタ
-Browser::Browser()
+Browser::Browser(QUrl homeUrl) :
+    m_homeUrl(homeUrl)
 {
 
     //DownloadManagerWidgetだけが残った場合アプリケーションを終了
@@ -37,7 +38,7 @@ BrowserWindow *Browser::createWindow(bool offTheRecord)
 
     //BrowserWindowクラスのインスタンス（ウィンドウの生成）
     auto profile = offTheRecord ? m_otrProfile.get() : QWebEngineProfile::defaultProfile();
-    auto mainWindow = new BrowserWindow(this, profile, false);
+    auto mainWindow = new BrowserWindow(this, profile, false, m_homeUrl);
     m_windows.append(mainWindow);
     QObject::connect(mainWindow, &QObject::destroyed, [this, mainWindow]() {
         m_windows.removeOne(mainWindow);
@@ -51,7 +52,7 @@ BrowserWindow *Browser::createWindow(bool offTheRecord)
 BrowserWindow *Browser::createDevToolsWindow()
 {
     auto profile = QWebEngineProfile::defaultProfile();
-    auto mainWindow = new BrowserWindow(this, profile, true);
+    auto mainWindow = new BrowserWindow(this, profile, true, m_homeUrl);
     m_windows.append(mainWindow);
     QObject::connect(mainWindow, &QObject::destroyed, [this, mainWindow]() {
         m_windows.removeOne(mainWindow);

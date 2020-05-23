@@ -23,7 +23,7 @@ class BrowserWindow : public QMainWindow
 public:
 
     //コンストラクタ
-    BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool forDevTools = false);
+    BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool forDevTools = false, QUrl homeUrl = QUrl());
 
     //Widgetの推奨サイズを取得
     QSize sizeHint() const override;
@@ -85,6 +85,9 @@ private slots:
     //次のコンボに進む要求時の処理のためのスロット
     void handleComboBackRequested();
 
+    //コンボ再読込要求時の処理のためのスロット
+    void handleComboReloadRequested();
+
 private:
 
     //ファイルメニューを生成
@@ -121,6 +124,10 @@ private:
     QAction *m_openTsvAction;               //TSVファイルを開くAction
     QAction *m_comboForwardAction;          //URL選択コンボ進むActionのポインタ
     QAction *m_comboBackAction;             //URL選択コンボ戻るActionのポインタ
+    QAction *m_homeUrlAction;               //HomeボタンAction
+    QAction *m_comboReloadAction;           //URL選択コンボ再読込Actionのポインタ
+
+    QUrl m_homeUrl;                         //規定のURL
 
 };
 
