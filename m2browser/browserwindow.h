@@ -15,6 +15,7 @@ QT_END_NAMESPACE
 class Browser;          //Browserクラスを参照
 class TabWidget;        //TabWidgetクラスを参照
 class WebView;          //WebViewクラスを参照
+class JavascriptUtil;
 
 class BrowserWindow : public QMainWindow
 {
@@ -128,6 +129,8 @@ private:
     QAction *m_comboReloadAction;           //URL選択コンボ再読込Actionのポインタ
 
     QUrl m_homeUrl;                         //規定のURL
+
+    JavascriptUtil *m_jsUtil;               //JavascriptUtilのインスタンスポインタ
 
 };
 

@@ -19,6 +19,7 @@ SOURCES += \
     browserwindow.cpp \
     downloadmanagerwidget.cpp \
     downloadwidget.cpp \
+    javascriptutil.cpp \
     main.cpp \
     browser.cpp \
     tabwidget.cpp \
@@ -31,6 +32,7 @@ HEADERS += \
     browserwindow.h \
     downloadmanagerwidget.h \
     downloadwidget.h \
+    javascriptutil.h \
     tabwidget.h \
     webpage.h \
     webpopupwindow.h \

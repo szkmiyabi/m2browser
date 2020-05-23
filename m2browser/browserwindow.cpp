@@ -3,6 +3,7 @@
 #include "downloadmanagerwidget.h"
 #include "tabwidget.h"
 #include "webview.h"
+#include "javascriptutil.h"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QDesktopWidget>
@@ -40,7 +41,8 @@ BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool 
     m_comboBackAction(nullptr),
     m_homeUrlAction(nullptr),
     m_comboReloadAction(nullptr),
-    m_homeUrl(homeUrl)
+    m_homeUrl(homeUrl),
+    m_jsUtil(new JavascriptUtil())
 {
 
     //closeイベントが届いたら自動でdeleteする設定
@@ -462,6 +464,14 @@ QToolBar *BrowserWindow::createToolBar()
     connect(downloadsAction, &QAction::triggered, [this]() {
         m_browser->downloadManagerWidget().show();
     });
+
+
+    auto jsAction = new QAction(this);
+    jsAction->setIcon(QIcon(QStringLiteral(":ninja.svg")));
+    connect(jsAction, &QAction::triggered, [this]() {
+        currentTab()->page()->runJavaScript(m_jsUtil->css_cut());
+    });
+    navigationBar->addAction(jsAction);
 
     return navigationBar;
 
