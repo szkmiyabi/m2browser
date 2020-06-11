@@ -23,6 +23,7 @@ SOURCES += \
     main.cpp \
     browser.cpp \
     tabwidget.cpp \
+    webinspector.cpp \
     webpage.cpp \
     webpopupwindow.cpp \
     webview.cpp
@@ -34,6 +35,7 @@ HEADERS += \
     downloadwidget.h \
     javascriptutil.h \
     tabwidget.h \
+    webinspector.h \
     webpage.h \
     webpopupwindow.h \
     webview.h
