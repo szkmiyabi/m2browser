@@ -67,11 +67,12 @@ void TabWidget::handleCurrentChanged(int index)
         emit loadProgress(view->loadProgress());
         emit urlChanged(view->url());
         emit favIconChanged(view->favIcon());
+        /*
         emit webActionEnabledChanged(QWebEnginePage::Back, view->isWebActionEnabled(QWebEnginePage::Back));
         emit webActionEnabledChanged(QWebEnginePage::Forward, view->isWebActionEnabled(QWebEnginePage::Forward));
         emit webActionEnabledChanged(QWebEnginePage::Stop, view->isWebActionEnabled(QWebEnginePage::Stop));
         emit webActionEnabledChanged(QWebEnginePage::Reload, view->isWebActionEnabled(QWebEnginePage::Reload));
-
+        */
     //タブがないときの処理
     } else {
 
@@ -79,11 +80,19 @@ void TabWidget::handleCurrentChanged(int index)
         emit loadProgress(0);
         emit urlChanged(QUrl());
         emit favIconChanged(QIcon());
+        /*
         emit webActionEnabledChanged(QWebEnginePage::Back, false);
         emit webActionEnabledChanged(QWebEnginePage::Forward, false);
         emit webActionEnabledChanged(QWebEnginePage::Stop, false);
         emit webActionEnabledChanged(QWebEnginePage::Reload, true);
+        */
     }
+
+    //タブを切り替えたときにwebActionが無効にならないよう手動で有効化
+    emit webActionEnabledChanged(QWebEnginePage::Back, true);
+    emit webActionEnabledChanged(QWebEnginePage::Forward, true);
+    emit webActionEnabledChanged(QWebEnginePage::Stop, true);
+    emit webActionEnabledChanged(QWebEnginePage::Reload, true);
 
 }
 
