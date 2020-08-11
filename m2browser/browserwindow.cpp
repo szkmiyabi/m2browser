@@ -730,8 +730,15 @@ void BrowserWindow::handleShowWindowTriggered()
 //DevToolsの表示要求に応じてDevToolsウィンドウを表示するためのスロット
 void BrowserWindow::handleDevToolsRequested(QWebEnginePage *source)
 {
-    source->setDevToolsPage(m_browser->createDevToolsWindow()->currentTab()->page());
+    QWebEnginePage *crPage = m_browser->createDevToolsWindow()->currentTab()->page();
+    source->setDevToolsPage(crPage);
     source->triggerAction(QWebEnginePage::InspectElement);
+
+    //url変更に対応させるためのシグナルスロットの紐付け
+    connect(source, &QWebEnginePage::urlChanged, [source, crPage](){
+        source->setDevToolsPage(crPage);
+        source->triggerAction(QWebEnginePage::InspectElement);
+    });
 }
 
 
