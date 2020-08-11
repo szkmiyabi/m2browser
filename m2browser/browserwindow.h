@@ -107,6 +107,9 @@ private:
     //コンボで選択したページに切替
     void handleComboCurrentChanged(int index);
 
+    //コンボ切り替え時のwebActionを有効化
+    void setWebActionComboCurrentChanged();
+
 private:
     Browser *m_browser;                     //Browserクラスのインスタンスポインタ
     QWebEngineProfile *m_profile;           //QWebEngineProfile（通常/プライベート切替用)のポインタ

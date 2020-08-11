@@ -752,6 +752,17 @@ void BrowserWindow::handleFindTextFinished(const QWebEngineFindTextResult &resul
 #endif
 
 
+//コンボ切り替え時のwebActionを有効化
+void BrowserWindow::setWebActionComboCurrentChanged()
+{
+    //コンボで選択した際自動で有効にならないwebActionを手動で有効化
+    currentTab()->webActionEnabledChanged(QWebEnginePage::WebAction::Back, true);
+    currentTab()->webActionEnabledChanged(QWebEnginePage::WebAction::Forward, true);
+    currentTab()->webActionEnabledChanged(QWebEnginePage::WebAction::Reload, true);
+    currentTab()->webActionEnabledChanged(QWebEnginePage::WebAction::Stop, true);
+}
+
+
 //TSVファイル読み込み要求の処理のためのスロット
 void BrowserWindow::handleTsvFileOpenRequested()
 {
@@ -794,7 +805,7 @@ void BrowserWindow::handleTsvFileOpenRequested()
     const QVector<QString> row = m_urlArr.at(0);
     currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
     m_urlComboBox->setCurrentIndex(0);
-
+    setWebActionComboCurrentChanged();
 }
 
 
@@ -807,6 +818,7 @@ void BrowserWindow::handleComboCurrentChanged(int index)
     m_urlArrIndex = index;
     const QVector<QString> row = m_urlArr.at(index);
     currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
+    setWebActionComboCurrentChanged();
 }
 
 
@@ -827,6 +839,7 @@ void BrowserWindow::handleComboBackRequested()
     const QVector<QString> row = m_urlArr.at(m_urlArrIndex);
     currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
     m_urlComboBox->setCurrentIndex(m_urlArrIndex);
+    setWebActionComboCurrentChanged();
 }
 
 
@@ -847,6 +860,7 @@ void BrowserWindow::handleComboForwardRequested()
     const QVector<QString> row = m_urlArr.at(m_urlArrIndex);
     currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
     m_urlComboBox->setCurrentIndex(m_urlArrIndex);
+    setWebActionComboCurrentChanged();
 }
 
 
@@ -857,5 +871,6 @@ void BrowserWindow::handleComboReloadRequested()
         return;
     const QVector<QString> row = m_urlArr.at(m_urlArrIndex);
     currentTab()->setUrl(QUrl::fromUserInput(row.at(1)));
+    setWebActionComboCurrentChanged();
 }
 
