@@ -21,8 +21,9 @@
         <file alias="sim-doc-link.svg">secondary_toolbar/sim-doc-link.svg</file>
         <file alias="sim-label-and-title.svg">secondary_toolbar/sim-label-and-title.svg</file>
         <file alias="sim-lang-attr.svg">secondary_toolbar/sim-lang-attr.svg</file>
-        <file alias="sim-semantic.svg">secondary_toolbar/sim-semantic.svg</file>
         <file alias="sim-wai-aria.svg">secondary_toolbar/sim-wai-aria.svg</file>
         <file alias="sim-superfocus.svg">secondary_toolbar/sim-superfocus.svg</file>
+        <file alias="sim-runjs.svg">secondary_toolbar/sim-runjs.svg</file>
+        <file alias="sim-semantic.svg">secondary_toolbar/sim-semantic.svg</file>
     </qresource>
 </RCC>

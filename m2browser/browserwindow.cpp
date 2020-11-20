@@ -21,6 +21,7 @@
 #include <QWebEngineFindTextResult>
 #endif
 #include <QWebEngineProfile>
+#include <QDebug>
 
 //コンストラクタ
 BrowserWindow::BrowserWindow(Browser *browser, QWebEngineProfile *profile, bool forDevTools, QUrl homeUrl) :
@@ -549,6 +550,35 @@ QToolBar *BrowserWindow::createSecondToolBar()
         currentTab()->page()->runJavaScript(m_jsUtil->wai_aria_attr());
     });
     secondToolBar->addAction(waiAriaAction);
+
+    //Run-JSシュミレーション要求を紐付け
+    auto runJsAction = new QAction(this);
+    runJsAction->setIcon(QIcon(QStringLiteral(":sim-runjs.svg")));
+    connect(runJsAction, &QAction::triggered, [this]() {
+        if(!currentTab())
+            return;
+        bool ok = false;
+        QString src = QInputDialog::getText(
+                    this,
+                    tr(u8"RunJS"),
+                    tr(u8"実行したいJavascriptコードを入力または貼り付けてください"),
+                    QLineEdit::Normal,
+                    QStringLiteral(""),
+                    &ok
+        );
+        if(!ok || src.length() < 1)
+            return;
+
+        //QInputDiaglogで取り込んだ文字列は\tと\nと"を自動エスケープするため整形処理する
+        src.replace("\t", "");
+        src.replace("\n", "");
+        //バックスラッシュ＋ダブルクォートをダブルクォートに置換できずシングルクォートに置換
+        src.replace(QStringLiteral("\""), QStringLiteral("'"));
+
+        //qDebug() << QStringLiteral("{") + src + QStringLiteral("}");
+        currentTab()->page()->runJavaScript(QStringLiteral("{") + src + QStringLiteral("}"));
+    });
+    secondToolBar->addAction(runJsAction);
 
     return secondToolBar;
 

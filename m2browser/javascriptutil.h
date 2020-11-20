@@ -28,7 +28,6 @@ public:
     static QString super_focus();
     //WAI-ARIA属性検証
     static QString wai_aria_attr();
-
 };
 
 #endif // JAVASCRIPTUTIL_H
